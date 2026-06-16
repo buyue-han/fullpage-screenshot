@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+    }
+    .header {
+      background: linear-gradient(135deg, #16213e, #0f3460);
+      padding: 16px 20px;
+      text-align: center;
+      border-bottom: 1px solid #0f3460;
+    }
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .header p {
+      font-size: 11px;
+      color: #8892b0;
+      margin-top: 4px;
+    }
+    .actions {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      text-align: left;
+    }
+    .btn-icon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #e94560, #c23152);
+      color: #fff;
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, #ff5c75, #e94560); transform: translateY(-1px); }
+    .btn-secondary {
+      background: #16213e;
+      color: #e0e0e0;
+      border: 1px solid #0f3460;
+    }
+    .btn-secondary:hover { background: #1a2744; border-color: #e94560; }
+    .btn-tertiary {
+      background: transparent;
+      color: #8892b0;
+      border: 1px dashed #2a2a4a;
+    }
+    .btn-tertiary:hover { border-color: #e94560; color: #e0e0e0; }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    .status {
+      padding: 8px 12px;
+      text-align: center;
+      font-size: 11px;
+      color: #8892b0;
+      border-top: 1px solid #1a1a3e;
+    }
+    .status.capturing { color: #e94560; }
+    .progress-bar {
+      display: none;
+      margin: 0 12px;
+      height: 3px;
+      background: #16213e;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-bar.active { display: block; }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e94560, #ff5c75);
+      border-radius: 2px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📸 网页长截图</h1>
+    <p>Full Page Screenshot Tool</p>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="btnFullPage">
+      <span class="btn-icon">🗺️</span>
+      <span>截取整个网页</span>
+    </button>
+    <button class="btn btn-secondary" id="btnVisible">
+      <span class="btn-icon">👁️</span>
+      <span>截取可见区域</span>
+    </button>
+    <button class="btn btn-secondary" id="btnSelectArea">
+      <span class="btn-icon">✂️</span>
+      <span>选择区域截图</span>
+    </button>
+    <button class="btn btn-tertiary" id="btnSaveAs">
+      <span class="btn-icon">💾</span>
+      <span>上次截图另存为...</span>
+    </button>
+  </div>
+
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="status" id="status">就绪 | 点击按钮开始截图</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

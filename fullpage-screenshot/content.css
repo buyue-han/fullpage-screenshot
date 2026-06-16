@@ -1,0 +1,38 @@
+/* 区域截图时的全屏暗色遮罩 */
+#fps-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.3) !important;
+  z-index: 2147483646 !important;
+  cursor: crosshair !important;
+}
+
+/* 用户拖动时显示的选区框 */
+#fps-selection-box {
+  position: fixed !important;
+  border: 2px solid #e94560 !important;
+  background: rgba(233, 69, 96, 0.1) !important;
+  z-index: 2147483647 !important;
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* 选区提示文字 */
+#fps-hint {
+  position: fixed !important;
+  top: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: rgba(26, 26, 46, 0.95) !important;
+  color: #fff !important;
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  z-index: 2147483647 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+  pointer-events: none !important;
+}
