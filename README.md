@@ -1,39 +1,51 @@
-# Full Page Screenshot
+# 网页长截图
 
-A Chrome extension that captures full-page, visible-area, and region-select screenshots with one click.
+一个轻量级的 Chrome 扩展，用来搞定各种网页截图需求。支持整页滚动拼接、可视区域一键截取，以及手动框选区域截图。
 
-## Features
+> 写这个插件主要是因为市面上的长截图工具要么太臃肿，要么要收费，干脆自己撸一个干净好用的。
 
-- **Full Page Screenshot** – Automatically scrolls and stitches the entire webpage into a single high-resolution image.
-- **Visible Area Screenshot** – Captures only the current viewport instantly.
-- **Region Select Screenshot** – Drag to select any area on the page for a precise capture.
-- **Smart Stitching** – Hides fixed/sticky elements (e.g., navbars) during scrolling to avoid duplicates, then restores them at the correct position in the final image.
-- **Auto Download** – Saves screenshots as PNG with timestamps.
-- **Save As** – Re-save the last screenshot via a file dialog.
-- **Rate-Limit Handling** – Automatically retries when hitting Chrome's capture API limits.
+![扩展界面预览](assets/popup-preview.png)
 
-## Installation
+## 能做什么
 
-1. Open Chrome and go to `chrome://extensions/`.
-2. Enable **Developer mode** (toggle at top right).
-3. Click **Load unpacked**.
-4. Select the `fullpage-screenshot` folder.
+- **截取整个网页**：自动滚动页面，把多屏内容拼接成一张完整的长图，固定导航栏之类元素也会自动处理，不会重复出现。
+- **截取可见区域**：只保存当前屏幕看到的内容，速度最快。
+- **选择区域截图**：在页面上直接拖动鼠标框选任意区域，按 ESC 可以取消。
+- **上次截图另存为**：如果自动下载被你手快关掉了，或者想换个路径保存，可以点这个重新保存上一次的截图。
 
-## Usage
+## 安装方法
 
-1. Click the extension icon in the toolbar.
-2. Choose one of the screenshot modes:
-   - 🗺️ Capture entire webpage
-   - 👁️ Capture visible area
-   - ✂️ Select region to capture
-3. The image will be downloaded automatically.
+目前还没上架 Chrome 商店，需要以开发者模式手动加载：
 
-## Tech Stack
+1. 下载或克隆本仓库到本地。
+2. 打开 Chrome，地址栏输入 `chrome://extensions/` 回车。
+3. 右上角打开「开发者模式」。
+4. 点击「加载已解压的扩展程序」，选择项目里的 `fullpage-screenshot` 文件夹。
+5. 浏览器工具栏出现相机图标，就可以用了。
 
-- Manifest V3
-- Vanilla JavaScript
-- Canvas API for image stitching
-- Chrome Extension APIs (`tabs`, `scripting`, `downloads`, `captureVisibleTab`)
+## 使用说明
+
+1. 点击浏览器右上角扩展图标，弹出操作面板。
+2. 根据需求点对应按钮：
+   - **截取整个网页**：适合保存文章、聊天记录、文档等需要完整上下文的内容。过程会自动滚动，请等待进度条走完，期间尽量不要切换标签页。
+   - **截取可见区域**：适合快速保存当前屏幕，比如视频画面、地图当前视角。
+   - **选择区域截图**：点击后弹出窗口会自动关闭，进入页面选区模式。按住鼠标左键拖动框出想要的范围，松开即完成；如果框太小（小于 10px）会自动取消。
+   - **上次截图另存为...**：会把最近一次成功生成的截图再次弹出"另存为"对话框，方便你改名或换目录。
+3. 截图完成后图片会自动下载到浏览器的默认下载目录，文件名带时间戳。
+
+## 技术说明
+
+- 整页截图采用**视口分块 + Canvas 拼接**方案。先按屏幕可视区域把页面切成网格，逐块截图后再拼到一张大画布上。
+- 截图过程中会临时**隐藏滚动条**和 `fixed` / `sticky` 定位元素，防止拼接后出现断层或重复内容。
+- 拼接完成后，会把页面滚动回顶部再补一张，把原本隐藏的顶部固定元素（如导航栏）单独贴回去，保证长图最上方是完整的。
+- 如果页面超级长，Canvas 像素会超过浏览器上限（约 2.68 亿像素），此时会自动降采样，避免崩溃。
+- Chrome 对 `chrome.tabs.captureVisibleTab` 有频率限制，插件内部做了限流和重试，如果页面特别长请耐心等待。
+
+## 已知限制
+
+- 某些使用了复杂 CSS 变换（`transform`）或 `canvas` 动态绘制的页面，拼接结果可能与肉眼看到的不完全一致。
+- 如果页面有懒加载图片，请在截图前先把页面滚动一遍，让资源加载完。
+- 极个别网站的 CSP 策略可能会阻止内容脚本注入，导致插件无法工作，刷新页面通常可解决。
 
 ## License
 
