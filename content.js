@@ -76,22 +76,6 @@
     ].join('\n');
     document.head.appendChild(scrollbarStyle);
 
-    // 找出所有 fixed / sticky 元素，截图时先隐藏，避免每屏都出现
-    const fixedElements = [];
-    const allElements = document.querySelectorAll('*');
-    for (const el of allElements) {
-      const style = getComputedStyle(el);
-      const pos = style.position;
-      if (pos === 'fixed' || pos === 'sticky') {
-        fixedElements.push({
-          el,
-          originalDisplay: el.style.display,
-          originalVisibility: el.style.visibility,
-          originalOpacity: el.style.opacity
-        });
-      }
-    }
-
     const fixedStyle = document.createElement('style');
     fixedStyle.id = 'fps-hide-fixed';
     fixedStyle.textContent = `
@@ -105,6 +89,40 @@
 
     // 等样式生效
     await new Promise(r => setTimeout(r, 200));
+
+    // 找出所有 fixed / sticky 元素，截图时先隐藏，避免每屏都出现
+    // 注意：很多网站的顶栏是「scrollY=0 时 static，滚动后被 JS 切成 fixed」的智能 header，
+    //      只在当前位置扫一次会漏掉它们，所以这里在多个滚动位置反复扫描合并。
+    const fixedElementSet = new Set();
+
+    function scanFixedAndSticky() {
+      const all = document.querySelectorAll('*');
+      for (const el of all) {
+        const cs = getComputedStyle(el);
+        if (cs.position === 'fixed' || cs.position === 'sticky') {
+          fixedElementSet.add(el);
+        }
+      }
+    }
+
+    // 在多个滚动位置触发可能的 JS 切换，多次合并扫描结果
+    const probeOffsets = [0, Math.min(200, document.documentElement.scrollHeight - 1)];
+    if (document.documentElement.scrollHeight > window.innerHeight) {
+      probeOffsets.push(window.innerHeight);
+      probeOffsets.push(window.innerHeight * 2);
+    }
+    for (const off of probeOffsets) {
+      window.scrollTo(0, off);
+      await new Promise(r => setTimeout(r, 250));
+      scanFixedAndSticky();
+    }
+
+    const fixedElements = Array.from(fixedElementSet).map(el => ({
+      el,
+      originalDisplay: el.style.display,
+      originalVisibility: el.style.visibility,
+      originalOpacity: el.style.opacity
+    }));
 
     const totalWidth = document.documentElement.scrollWidth;
     const totalHeight = document.documentElement.scrollHeight;
@@ -179,6 +197,8 @@
       // 固定元素在滚回顶部后需要单独补一张，再贴回去，不然导航栏会缺失
       let topCapture = null;
       if (fixedElements.length > 0 && captures.length > 0) {
+        // 等智能 header 等 JS 切换完毕后再抓
+        await new Promise(r => setTimeout(r, 400));
         topCapture = await captureTab();
         for (const item of fixedElements) {
           item.el.setAttribute('data-fps-hidden', 'true');
@@ -192,8 +212,11 @@
       for (const item of fixedElements) {
         const rect = item.el.getBoundingClientRect();
         const cs = getComputedStyle(item.el);
-        // 只把真正固定在顶部附近的元素贴回去
-        if (cs.position === 'fixed' || (cs.position === 'sticky' && originalScrollY <= 0 && rect.top < viewportHeight * 0.5)) {
+        // 只把真正固定/吸附在视口顶部附近的元素贴回去；
+        // 注意 sticky 元素无论用户原本在不在顶部，最终拼图都从 0 开始，所以不能再用 originalScrollY 过滤
+        const isTopFixed = cs.position === 'fixed' && rect.top < viewportHeight * 0.5 && rect.top > -rect.height;
+        const isTopSticky = cs.position === 'sticky' && rect.top < viewportHeight * 0.5 && rect.top > -rect.height;
+        if (isTopFixed || isTopSticky) {
           topFixedRects.push({
             left: rect.left,
             top: rect.top,
